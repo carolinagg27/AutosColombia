@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block titulo %}Vehículos{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Vehículos</h1><p>Administra los vehículos vinculados a los clientes.</p></div></div>
+<div class="panel"><h2>Nuevo vehículo</h2>
+<form method="post" class="form-cuadricula"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div><label class="form-label">Placa</label><input name="placa" class="form-control" maxlength="12" required placeholder="ABC123"></div>
+  <div><label class="form-label">Tipo</label><select name="tipo" class="form-select" required><option value="Carro">Carro</option><option value="Moto">Moto</option></select></div>
+  <div><label class="form-label">Cliente</label><select name="cliente_id" class="form-select" required><option value="">Seleccionar cliente</option>{% for c in clientes %}<option value="{{ c.id }}">{{ c.nombre }} — {{ c.documento }}</option>{% endfor %}</select></div>
+  <div class="campo-boton"><button class="btn btn-primario" {% if not clientes %}disabled{% endif %}>Guardar vehículo</button></div>
+</form></div>
+<div class="panel"><h2>Vehículos registrados</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>PLACA</th><th>TIPO</th><th>CLIENTE</th><th>ACCIÓN</th></tr></thead><tbody>
+{% for v in vehiculos %}<tr><td><strong>{{ v.placa }}</strong></td><td>{{ v.tipo }}</td><td>{{ v.cliente.nombre }}</td><td><a href="{{ url_for('vehiculos.editar', id=v.id) }}">Editar</a></td></tr>{% else %}<tr><td colspan="4" class="vacio">No hay vehículos registrados.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

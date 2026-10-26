@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block titulo %}Historial{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Historial de movimientos</h1><p>Consulta las entradas y salidas registradas.</p></div></div>
+<div class="panel"><form method="get" class="form-cuadricula">
+  <div><label class="form-label">Buscar por placa</label><input name="placa" class="form-control" maxlength="12" value="{{ placa }}" placeholder="ABC123"></div>
+  <div><label class="form-label">Estado</label><select name="estado" class="form-select"><option value="">Todos</option><option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activo</option><option value="Cerrado" {% if estado == 'Cerrado' %}selected{% endif %}>Cerrado</option></select></div>
+  <div><label class="form-label">Desde (fecha de entrada)</label><input type="date" name="desde" value="{{ desde }}" class="form-control"></div>
+  <div><label class="form-label">Hasta (fecha de entrada)</label><input type="date" name="hasta" value="{{ hasta }}" class="form-control"></div>
+  <div class="campo-boton"><button class="btn btn-primario">Buscar</button></div>
+</form></div>
+<div class="panel"><div class="panel-titulo"><h2>Resultados</h2><small class="texto-gris">Se muestran hasta 300 movimientos recientes</small></div><div class="table-responsive"><table class="table tabla"><thead><tr><th>ID</th><th>PLACA</th><th>CELDA</th><th>ENTRADA</th><th>SALIDA</th><th>ESTADO</th><th>OPERARIOS</th></tr></thead><tbody>
+{% for m in movimientos %}<tr><td>#{{ m.id }}</td><td>{{ m.vehiculo.placa }}</td><td>{{ m.celda.numero }}</td><td>{{ m.fecha_entrada.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ m.fecha_salida.strftime('%d/%m/%Y %H:%M') if m.fecha_salida else 'Pendiente' }}</td><td><span class="estado {{ 'estado-activo' if m.estado == 'Activo' else 'estado-cerrado' }}">{{ m.estado }}</span></td><td>Entrada: {{ m.usuario_entrada.nombre }}<small class="d-block texto-gris">Salida: {{ m.usuario_salida.nombre if m.usuario_salida else "Pendiente" }}</small></td></tr>{% else %}<tr><td colspan="7" class="vacio">No hay registros que coincidan con la búsqueda.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

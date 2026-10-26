@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block titulo %}Registrar entrada{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Registrar entrada</h1><p>Verifica la mensualidad y asigna una celda disponible.</p></div></div>
+<div class="panel panel-form"><h2>Datos del ingreso</h2><form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label class="form-label">Placa del vehículo</label><input name="placa" class="form-control" required maxlength="12" list="placas" placeholder="ABC123" autocomplete="off"><datalist id="placas">{% for v in vehiculos %}<option value="{{ v.placa }}">{{ v.cliente.nombre }} ({{ v.tipo }})</option>{% endfor %}</datalist><small class="texto-gris">El vehículo debe estar registrado y tener una mensualidad pagada vigente.</small></div>
+  <div class="mb-3"><label class="form-label">Celda disponible</label><select name="celda_id" class="form-select" required><option value="">Selecciona una celda</option>{% for c in celdas %}<option value="{{ c.id }}">{{ c.numero }} — {{ c.tipo }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primario" {% if not celdas %}disabled{% endif %}>Confirmar entrada</button>
+  <a href="{{ url_for('celdas.lista') }}" class="btn btn-secundario">Ver celdas</a>
+</form></div>
+{% endblock %}

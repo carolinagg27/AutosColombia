@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar vehículo{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Editar vehículo</h1><p>Actualiza los datos de la placa {{ vehiculo.placa }}.</p></div></div>
+<div class="panel panel-form"><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label class="form-label">Placa</label><input name="placa" class="form-control" maxlength="12" value="{{ vehiculo.placa }}" required></div>
+  <div class="mb-3"><label class="form-label">Tipo</label><select name="tipo" class="form-select"><option value="Carro" {% if vehiculo.tipo == 'Carro' %}selected{% endif %}>Carro</option><option value="Moto" {% if vehiculo.tipo == 'Moto' %}selected{% endif %}>Moto</option></select></div>
+  <div class="mb-3"><label class="form-label">Cliente</label><select name="cliente_id" class="form-select">{% for c in clientes %}<option value="{{ c.id }}" {% if c.id == vehiculo.cliente_id %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primario">Guardar cambios</button> <a class="btn btn-secundario" href="{{ url_for('vehiculos.lista') }}">Cancelar</a>
+</form></div>
+{% endblock %}

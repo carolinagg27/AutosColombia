@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block titulo %}Registrar salida{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Registrar salida</h1><p>Finaliza el movimiento y libera automáticamente la celda.</p></div></div>
+<div class="panel"><h2>Vehículos actualmente estacionados</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>PLACA</th><th>CLIENTE</th><th>CELDA</th><th>FECHA DE ENTRADA</th><th>ACCIÓN</th></tr></thead><tbody>
+{% for m in movimientos %}<tr><td><strong>{{ m.vehiculo.placa }}</strong></td><td>{{ m.vehiculo.cliente.nombre }}</td><td>{{ m.celda.numero }}</td><td>{{ m.fecha_entrada.strftime('%d/%m/%Y %H:%M') }}</td><td>
+  <form method="post" onsubmit="return confirm('¿Confirmas la salida de {{ m.vehiculo.placa }}?')"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="movimiento_id" value="{{ m.id }}"><button class="btn btn-primario btn-sm">Registrar salida</button></form>
+</td></tr>{% else %}<tr><td colspan="5" class="vacio">Actualmente no hay vehículos estacionados.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

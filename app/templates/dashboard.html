@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block titulo %}Panel principal{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Panel principal</h1><p>Resumen general del parqueadero y sus operaciones.</p></div><a href="{{ url_for('movimientos.entradas') }}" class="btn btn-primario">+ Registrar entrada</a></div>
+<div class="metricas">
+  <div class="metrica"><span>ESPACIOS TOTALES</span><strong>{{ total }}</strong><small>Celdas registradas</small></div>
+  <div class="metrica"><span>DISPONIBLES</span><strong class="verde">{{ disponibles }}</strong><small>Listos para asignar</small></div>
+  <div class="metrica"><span>OCUPADOS</span><strong class="azul">{{ ocupadas }}</strong><small>Vehículos estacionados</small></div>
+  <div class="metrica"><span>FUERA DE SERVICIO</span><strong class="naranja">{{ fuera_servicio }}</strong><small>Temporalmente inactivos</small></div>
+</div>
+<div class="panel"><div class="panel-titulo"><h2>Actividad reciente</h2><a href="{{ url_for('movimientos.historial') }}">Ver historial completo</a></div>
+  <div class="table-responsive"><table class="table tabla"><thead><tr><th>PLACA</th><th>CELDA</th><th>ENTRADA</th><th>SALIDA</th><th>ESTADO</th></tr></thead><tbody>
+  {% for m in movimientos %}<tr><td><strong>{{ m.vehiculo.placa }}</strong></td><td>{{ m.celda.numero }}</td><td>{{ m.fecha_entrada.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ m.fecha_salida.strftime('%d/%m/%Y %H:%M') if m.fecha_salida else '—' }}</td><td><span class="estado {{ 'estado-activo' if m.estado == 'Activo' else 'estado-cerrado' }}">{{ m.estado }}</span></td></tr>{% else %}<tr><td colspan="5" class="vacio">Todavía no hay movimientos registrados.</td></tr>{% endfor %}
+  </tbody></table></div>
+</div>
+{% if current_user.rol == 'Administrador' %}
+<div class="acciones-rapidas"><div>Clientes registrados: <strong>{{ clientes }}</strong></div><div>Vehículos registrados: <strong>{{ vehiculos }}</strong></div>
+<form action="{{ url_for('reportes.respaldo') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn btn-secundario">Descargar respaldo de la base de datos</button></form></div>
+{% endif %}
+{% endblock %}

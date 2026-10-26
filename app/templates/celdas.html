@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block titulo %}Celdas{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Gestión de celdas</h1><p>Consulta y administra los espacios de estacionamiento.</p></div></div>
+{% if current_user.rol == 'Administrador' %}
+<div class="panel"><h2>Agregar celda</h2><form action="{{ url_for('celdas.crear') }}" method="post" class="form-cuadricula">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div><label class="form-label">Número</label><input name="numero" required maxlength="12" class="form-control" placeholder="C-09"></div>
+  <div><label class="form-label">Tipo</label><select name="tipo" class="form-select"><option>Carro</option><option>Moto</option></select></div>
+  <div class="campo-boton"><button class="btn btn-primario">Guardar celda</button></div>
+</form></div>
+{% endif %}
+<div class="panel"><div class="panel-titulo"><h2>Mapa de ocupación</h2><small class="texto-gris">Disponible · Ocupada · Fuera de servicio</small></div>
+<div class="cuadricula-celdas">
+{% for celda in celdas %}
+<div class="tarjeta-celda {{ 'libre' if celda.estado == 'Disponible' else 'ocupada' if celda.estado == 'Ocupada' else 'inactiva' }}">
+  <div class="celda-icono">{{ '🚗' if celda.tipo == 'Carro' else '🛵' }}</div>
+  <strong>{{ celda.numero }}</strong><small>{{ celda.tipo }}</small><span>{{ celda.estado }}</span>
+  {% if current_user.rol == 'Administrador' and celda.estado != 'Ocupada' %}
+  <form action="{{ url_for('celdas.estado', id=celda.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="estado" value="{{ 'Fuera de servicio' if celda.estado == 'Disponible' else 'Disponible' }}">
+    <button class="boton-celda" type="submit">{{ 'Deshabilitar' if celda.estado == 'Disponible' else 'Habilitar' }}</button>
+  </form>
+  {% endif %}
+</div>
+{% else %}<p class="texto-gris">No hay celdas registradas.</p>{% endfor %}
+</div></div>
+{% endblock %}

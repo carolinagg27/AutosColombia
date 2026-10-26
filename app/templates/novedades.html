@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Novedades{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Registro de novedades</h1><p>Documenta acontecimientos relacionados con los vehículos.</p></div></div>
+<div class="panel"><h2>Nueva novedad</h2><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label class="form-label">Vehículo estacionado</label><select name="movimiento_id" class="form-select" required><option value="">Selecciona un vehículo</option>{% for m in activos %}<option value="{{ m.id }}">{{ m.vehiculo.placa }} — Celda {{ m.celda.numero }}</option>{% endfor %}</select></div>
+  <div class="mb-3"><label class="form-label">Descripción de la novedad</label><textarea name="descripcion" rows="3" class="form-control" maxlength="1000" required placeholder="Describe lo ocurrido"></textarea></div>
+  <button class="btn btn-primario" {% if not activos %}disabled{% endif %}>Guardar novedad</button>
+</form></div>
+<div class="panel"><h2>Novedades registradas</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>FECHA</th><th>PLACA</th><th>DESCRIPCIÓN</th><th>OPERARIO</th></tr></thead><tbody>
+{% for n in novedades %}<tr><td>{{ n.fecha.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ n.movimiento.vehiculo.placa }}</td><td>{{ n.descripcion }}</td><td>{{ n.usuario.nombre }}</td></tr>{% else %}<tr><td colspan="4" class="vacio">No hay novedades registradas.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

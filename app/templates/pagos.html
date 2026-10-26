@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block titulo %}Mensualidades y pagos{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Mensualidades y pagos</h1><p>Registra períodos de servicio y sus pagos completos.</p></div></div>
+<div class="dos-columnas">
+  <div class="panel"><h2>Nueva mensualidad</h2><form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="accion" value="mensualidad">
+    <div class="mb-3"><label class="form-label">Vehículo</label><select name="vehiculo_id" class="form-select" required><option value="">Selecciona vehículo</option>{% for v in vehiculos %}<option value="{{ v.id }}">{{ v.placa }} — {{ v.cliente.nombre }}</option>{% endfor %}</select></div>
+    <div class="mb-3"><label class="form-label">Fecha inicial</label><input type="date" name="fecha_inicio" required class="form-control"></div>
+    <div class="mb-3"><label class="form-label">Fecha final</label><input type="date" name="fecha_fin" required class="form-control"></div>
+    <div class="mb-3"><label class="form-label">Valor de la mensualidad (COP)</label><input type="number" min="1" step="1" name="valor_cop" required class="form-control"></div>
+    <button class="btn btn-primario" {% if not vehiculos %}disabled{% endif %}>Crear mensualidad</button>
+  </form></div>
+  <div class="panel"><h2>Registrar pago</h2><form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="accion" value="pago">
+    <div class="mb-3"><label class="form-label">Mensualidad pendiente</label><select name="mensualidad_id" class="form-select" required><option value="">Selecciona mensualidad</option>{% for m in mensualidades if not m.pago %}<option value="{{ m.id }}">#{{ m.id }} — {{ m.vehiculo.placa }} — {{ m.valor_cop | cop }}</option>{% endfor %}</select></div>
+    <div class="mb-3"><label class="form-label">Método de pago</label><select name="metodo" class="form-select"><option>Efectivo</option><option>Transferencia</option></select></div>
+    <p class="texto-gris">El sistema registra automáticamente el valor total de la mensualidad.</p>
+    <button class="btn btn-primario">Registrar pago</button>
+  </form></div>
+</div>
+<div class="panel"><h2>Mensualidades registradas</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>PLACA</th><th>PERÍODO</th><th>VALOR</th><th>ESTADO DE PAGO</th></tr></thead><tbody>
+{% for m in mensualidades %}<tr><td>{{ m.vehiculo.placa }}</td><td>{{ m.fecha_inicio.strftime('%d/%m/%Y') }} — {{ m.fecha_fin.strftime('%d/%m/%Y') }}</td><td>{{ m.valor_cop | cop }}</td><td><span class="estado {{ 'estado-disponible' if m.pago else 'estado-pendiente' }}">{{ 'Pagada' if m.pago else 'Pendiente' }}</span></td></tr>{% else %}<tr><td colspan="4" class="vacio">No hay mensualidades registradas.</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="panel"><h2>Últimos pagos</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>FECHA</th><th>PLACA</th><th>VALOR</th><th>MÉTODO</th><th>RESPONSABLE</th></tr></thead><tbody>
+{% for p in pagos %}<tr><td>{{ p.fecha_pago.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ p.mensualidad.vehiculo.placa }}</td><td>{{ p.valor_cop | cop }}</td><td>{{ p.metodo }}</td><td>{{ p.usuario.nombre }}</td></tr>{% else %}<tr><td colspan="5" class="vacio">No hay pagos registrados.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

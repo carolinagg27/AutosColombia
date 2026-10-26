@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar cliente{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Editar cliente</h1><p>Actualiza la información de {{ cliente.nombre }}.</p></div></div>
+<div class="panel panel-form"><form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label class="form-label">Documento</label><input class="form-control" name="documento" value="{{ cliente.documento }}" required maxlength="25"></div>
+  <div class="mb-3"><label class="form-label">Nombre</label><input class="form-control" name="nombre" value="{{ cliente.nombre }}" required maxlength="100"></div>
+  <div class="mb-3"><label class="form-label">Teléfono</label><input class="form-control" name="telefono" value="{{ cliente.telefono or '' }}" maxlength="30"></div>
+  <button class="btn btn-primario">Guardar cambios</button> <a class="btn btn-secundario" href="{{ url_for('clientes.lista') }}">Cancelar</a>
+</form></div>
+{% endblock %}

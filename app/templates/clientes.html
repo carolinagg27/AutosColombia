@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Clientes</h1><p>Registra y consulta los clientes del parqueadero.</p></div></div>
+<div class="panel"><h2>Nuevo cliente</h2>
+  <form method="post" class="form-cuadricula">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div><label class="form-label">Documento</label><input class="form-control" name="documento" maxlength="25" required></div>
+    <div><label class="form-label">Nombre completo</label><input class="form-control" name="nombre" maxlength="100" required></div>
+    <div><label class="form-label">Teléfono</label><input class="form-control" name="telefono" maxlength="30"></div>
+    <div class="campo-boton"><button class="btn btn-primario">Guardar cliente</button></div>
+  </form>
+</div>
+<div class="panel"><h2>Clientes registrados</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>DOCUMENTO</th><th>NOMBRE</th><th>TELÉFONO</th><th>ACCIÓN</th></tr></thead><tbody>
+{% for c in clientes %}<tr><td>{{ c.documento }}</td><td>{{ c.nombre }}</td><td>{{ c.telefono or '—' }}</td><td><a href="{{ url_for('clientes.editar', id=c.id) }}">Editar</a></td></tr>{% else %}<tr><td colspan="4" class="vacio">No hay clientes registrados.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}
