@@ -101,12 +101,42 @@ Autos_Colombia_Software/
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Las pruebas utilizan otra base temporal y no modifican la base de datos del parqueadero.
+Las pruebas utilizan bases temporales y no modifican la base de datos del parqueadero.
 
-## 8. Respaldo y limitaciones
+## 8. Cambios de la Iteración 2
+
+- Usuarios: crear, editar, activar y desactivar cuentas (solo administrador).
+- Clientes y vehículos: registro y actualización; no se borran datos con movimientos asociados.
+- Celdas: crear, filtrar por tipo y estado, editar (solo desocupadas), poner fuera de servicio y habilitar.
+- **Observación del profesor:** en Entradas, escribe la placa y pulsa «Buscar vehículo». La interfaz muestra placa, cliente, tipo, fechas y pago de la mensualidad. Luego muestra **solo celdas disponibles del mismo tipo**. Se valida de nuevo al confirmar, del lado del servidor.
+- Respaldo: se realiza una copia SQLite, se cierra el archivo temporal, se comprueba su integridad y se descarga. Se incluye la restauración asistida.
+- Asociación usuario entrada / usuario salida: dos referencias distintas, siendo la salida nula hasta cerrar el movimiento.
+
+## 9. Respaldo y restauración (Windows)
+
+1. Entra con `admin`, abre el **Panel principal** y pulsa **Descargar respaldo**.
+2. Verifica que se descargó un archivo `autos_colombia_respaldo_*.db`.
+3. Detén `iniciar_windows.bat` (Ctrl+C) antes de restaurar.
+4. Copia el `.db` a la carpeta del proyecto o indica su ruta completa entre comillas:
+
+```powershell
+.\.venv\Scripts\python.exe restaurar_respaldo.py "C:\Usuarios\TuUsuario\Descargas\autos_colombia_respaldo_20261112_123000.db"
+```
+
+El script comprueba `PRAGMA integrity_check`, comprueba las ocho tablas y genera una copia preventiva de la base actual. Se **probó lógicamente la copia y restauración** mediante pruebas de SQLite; conviene repetir la descarga desde Chrome/Edge en tu instalación de Windows.
+
+## 10. Limitaciones
 
 Con la cuenta `admin`, abre el panel principal y pulsa **Descargar respaldo**. Se descargará un archivo `.db` con una copia SQLite. Guarda estas copias fuera del equipo principal.
 
 Esta versión es un **prototipo académico para uso local**. No incluye lector de placas, hardware de barreras, facturación electrónica, pagos en línea ni despliegue en Internet. Para una operación comercial real harían falta pruebas adicionales, gestión de cambios del esquema, políticas de datos personales, copias automáticas y servidor web de producción. No habilites el servidor de desarrollo para acceso público.
 
 **Recuperar la base:** detén el servidor, haz una copia de seguridad del archivo actual y reemplaza `instance/autos_colombia.db` por el respaldo descargado, manteniendo el mismo nombre. Las cuentas quedarán como estaban en la fecha del respaldo.
+
+## 11. Revisión y validación reforzada (noviembre de 2026)
+
+Esta entrega incorpora la dependencia `tzdata` necesaria en Windows para la zona horaria colombiana, además de correcciones para evitar asignaciones sobre celdas que conservan movimientos activos, asegurar pagos por el valor completo, filtrar usuarios y descartar respuestas tardías de la consulta previa por placa. El respaldo verifica también las claves foráneas y la restauración utiliza una copia preventiva y reemplazo atómico.
+
+**Pruebas automáticas en Windows:** después de `instalar_windows.bat`, ejecuta **`probar_windows.bat`**. Este ejecuta las pruebas existentes, las 19 pruebas de aceptación de la Iteración 2, y los controles de base de datos y plantillas. Las pruebas crean bases SQLite temporales, sin sobrescribir tu base real.
+
+Abre **`INFORME_VERIFICACION.md`** para ver qué comprobaciones se ejecutaron realmente y cuáles siguen pendientes. No se ha certificado que el software sea 100 % funcional en Windows antes de efectuar esa validación en el equipo de destino.

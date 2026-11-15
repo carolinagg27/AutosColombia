@@ -1,13 +1,65 @@
+"""Entradas, salidas y consulta previa del vehículo para el operario."""
 from datetime import date
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from app.models import db, Celda, Movimiento, Vehiculo
+from app import ahora_colombia
+from app.models import db, Celda, Movimiento, Vehiculo, Mensualidad
 from app.services.movimientos_service import registrar_entrada, registrar_salida
 
 bp = Blueprint("movimientos", __name__)
+
+
+def normalizar_placa(valor):
+    return (valor or "").strip().upper().replace(" ", "")
+
+
+@bp.get("/api/vehiculos/consulta")
+@login_required
+def consultar_vehiculo():
+    """Permite VER el cliente, vigencia y celdas compatibles antes de confirmar.
+    La comprobación se repite en el servidor al registrar, para evitar confiar en el navegador.
+    """
+    placa = normalizar_placa(request.args.get("placa"))
+    if not placa:
+        return jsonify(encontrado=False, autorizado=False, motivo="Escribe una placa."), 400
+    vehiculo = Vehiculo.query.filter_by(placa=placa).first()
+    if not vehiculo:
+        return jsonify(encontrado=False, autorizado=False, motivo="Vehículo no registrado."), 404
+
+    hoy = ahora_colombia().date()
+    mensualidades = Mensualidad.query.filter_by(vehiculo_id=vehiculo.id).order_by(Mensualidad.fecha_fin.desc()).all()
+    mensualidad = next((m for m in mensualidades if m.esta_vigente(hoy)), None)
+    ultima = mensualidad or (mensualidades[0] if mensualidades else None)
+    movimiento_activo = Movimiento.query.filter_by(vehiculo_id=vehiculo.id, estado="Activo").first()
+    # No ofrecer celdas que figuren en un movimiento activo, aun si el estado
+    # persistido estuviera desincronizado por datos antiguos.
+    ocupadas = db.session.query(Movimiento.celda_id).filter(Movimiento.estado == "Activo")
+    celdas = (Celda.query.filter_by(tipo=vehiculo.tipo, estado="Disponible")
+              .filter(~Celda.id.in_(ocupadas))
+              .order_by(Celda.numero).all())
+
+    motivo = ""
+    if movimiento_activo:
+        motivo = "El vehículo ya tiene una entrada activa."
+    elif not mensualidad:
+        motivo = "No tiene una mensualidad vigente y pagada."
+    elif not celdas:
+        motivo = "No hay celdas disponibles para este tipo de vehículo."
+
+    return jsonify(
+        encontrado=True, autorizado=not motivo, motivo=motivo,
+        placa=vehiculo.placa, cliente=vehiculo.cliente.nombre, tipo=vehiculo.tipo,
+        mensualidad={
+            "inicio": ultima.fecha_inicio.strftime("%d/%m/%Y") if ultima else None,
+            "fin": ultima.fecha_fin.strftime("%d/%m/%Y") if ultima else None,
+            "pagada": bool(ultima and ultima.pago),
+            "vigente": bool(mensualidad),
+        },
+        celdas=[{"id": c.id, "numero": c.numero, "tipo": c.tipo} for c in celdas],
+    )
 
 
 @bp.route("/entradas", methods=["GET", "POST"])
@@ -25,8 +77,7 @@ def entradas():
         except SQLAlchemyError:
             db.session.rollback()
             flash("Error al guardar el ingreso. Inténtalo de nuevo.", "danger")
-    return render_template("entradas.html", vehiculos=Vehiculo.query.order_by(Vehiculo.placa).all(),
-                           celdas=Celda.query.filter_by(estado="Disponible").order_by(Celda.numero).all())
+    return render_template("entradas.html", vehiculos=Vehiculo.query.order_by(Vehiculo.placa).all())
 
 
 @bp.route("/salidas", methods=["GET", "POST"])

@@ -19,6 +19,8 @@ def registrar_entrada(placa, celda_id, usuario_id):
         raise ValueError("La celda no está disponible.")
     if celda.tipo != vehiculo.tipo:
         raise ValueError("La celda no es compatible con el tipo de vehículo.")
+    if Movimiento.query.filter_by(celda_id=celda.id, estado="Activo").first():
+        raise ValueError("La celda ya tiene un movimiento activo.")
     movimiento = Movimiento(vehiculo_id=vehiculo.id, celda_id=celda.id,
                             usuario_entrada_id=usuario_id, fecha_entrada=ahora_colombia(), estado="Activo")
     db.session.add(movimiento)
@@ -31,7 +33,10 @@ def registrar_salida(movimiento_id, usuario_id):
     movimiento = db.session.get(Movimiento, movimiento_id)
     if not movimiento or movimiento.estado != "Activo":
         raise ValueError("No existe una entrada activa para registrar la salida.")
-    movimiento.cerrar_salida(usuario_id, ahora_colombia())
+    fecha_salida = ahora_colombia()
+    if fecha_salida < movimiento.fecha_entrada:
+        raise ValueError("La fecha de salida no puede ser anterior a la entrada.")
+    movimiento.cerrar_salida(usuario_id, fecha_salida)
     movimiento.celda.estado = "Disponible"
     db.session.commit()
     return movimiento

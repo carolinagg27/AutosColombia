@@ -9,6 +9,8 @@ bp = Blueprint("vehiculos", __name__)
 
 def datos_vehiculo():
     placa = obligatorio(request.form.get("placa"), "placa", 12).upper().replace(" ", "")
+    if not placa.isalnum():
+        raise ValueError("La placa solo puede contener letras y números.")
     tipo = request.form.get("tipo")
     if tipo not in ("Carro", "Moto"):
         raise ValueError("Selecciona un tipo de vehículo válido.")

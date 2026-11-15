@@ -1,12 +1,31 @@
 {% extends 'base.html' %}
 {% block titulo %}Registrar entrada{% endblock %}
 {% block contenido %}
-<div class="cabecera"><div><h1>Registrar entrada</h1><p>Verifica la mensualidad y asigna una celda disponible.</p></div></div>
-<div class="panel panel-form"><h2>Datos del ingreso</h2><form method="post">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div class="mb-3"><label class="form-label">Placa del vehículo</label><input name="placa" class="form-control" required maxlength="12" list="placas" placeholder="ABC123" autocomplete="off"><datalist id="placas">{% for v in vehiculos %}<option value="{{ v.placa }}">{{ v.cliente.nombre }} ({{ v.tipo }})</option>{% endfor %}</datalist><small class="texto-gris">El vehículo debe estar registrado y tener una mensualidad pagada vigente.</small></div>
-  <div class="mb-3"><label class="form-label">Celda disponible</label><select name="celda_id" class="form-select" required><option value="">Selecciona una celda</option>{% for c in celdas %}<option value="{{ c.id }}">{{ c.numero }} — {{ c.tipo }}</option>{% endfor %}</select></div>
-  <button class="btn btn-primario" {% if not celdas %}disabled{% endif %}>Confirmar entrada</button>
-  <a href="{{ url_for('celdas.lista') }}" class="btn btn-secundario">Ver celdas</a>
-</form></div>
+<div class="cabecera"><div><h1>Registrar entrada</h1><p>Primero consulta el vehículo; después selecciona una celda compatible.</p></div></div>
+<div class="panel panel-form">
+  <h2>1. Buscar vehículo por placa</h2>
+  <div class="mb-3">
+    <label for="placa" class="form-label">Placa del vehículo</label>
+    <div class="input-group">
+      <input id="placa" name="placa_busqueda" class="form-control" maxlength="12" list="placas" placeholder="ABC123" autocomplete="off" aria-describedby="ayuda-placa">
+      <button type="button" id="buscar-vehiculo" class="btn btn-secundario">Buscar vehículo</button>
+    </div>
+    <datalist id="placas">{% for v in vehiculos %}<option value="{{ v.placa }}">{{ v.tipo }}</option>{% endfor %}</datalist>
+    <small id="ayuda-placa" class="texto-gris">El sistema mostrará el cliente, el tipo y la vigencia de la mensualidad.</small>
+  </div>
+  <div id="resultado-consulta" class="consulta-vehiculo" role="status" aria-live="polite">Escribe la placa y pulsa «Buscar vehículo».</div>
+  <form id="form-entrada" method="post" data-consulta-url="{{ url_for('movimientos.consultar_vehiculo') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="placa" id="placa-confirmacion">
+    <h2 class="mt-4">2. Asignar celda</h2>
+    <div class="mb-3"><label for="celda_id" class="form-label">Celdas disponibles para el vehículo</label>
+      <select name="celda_id" id="celda_id" class="form-select" required disabled>
+        <option value="">Primero consulta una placa</option>
+      </select>
+    </div>
+    <button id="confirmar-entrada" class="btn btn-primario" disabled>Confirmar entrada</button>
+    <a href="{{ url_for('celdas.lista') }}" class="btn btn-secundario">Ver celdas</a>
+  </form>
+</div>
+<script src="{{ url_for('static', filename='js/entrada.js') }}" defer></script>
 {% endblock %}

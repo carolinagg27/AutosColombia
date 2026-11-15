@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar usuario{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Editar usuario</h1><p>Modifica los datos de {{ usuario.nombre }}.</p></div></div>
+<div class="panel panel-form">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3"><label for="nombre" class="form-label">Nombre</label><input id="nombre" class="form-control" name="nombre" required maxlength="100" value="{{ usuario.nombre }}"></div>
+    <div class="mb-3"><label for="usuario" class="form-label">Nombre de usuario</label><input id="usuario" class="form-control" name="usuario" required maxlength="60" value="{{ usuario.usuario }}"></div>
+    <div class="mb-3"><label for="rol" class="form-label">Rol</label><select id="rol" class="form-select" name="rol"><option value="Operario" {% if usuario.rol=='Operario' %}selected{% endif %}>Operario</option><option value="Administrador" {% if usuario.rol=='Administrador' %}selected{% endif %}>Administrador</option></select></div>
+    <div class="mb-3"><label for="contrasena" class="form-label">Nueva contraseña (opcional, mínimo 8 caracteres)</label><input id="contrasena" class="form-control" type="password" name="contrasena" minlength="8" maxlength="128" autocomplete="new-password"><small class="texto-gris">Deja vacío para conservar la contraseña actual.</small></div>
+    <button class="btn btn-primario">Guardar cambios</button> <a class="btn btn-secundario" href="{{ url_for('auth.usuarios') }}">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

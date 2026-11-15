@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar celda{% endblock %}
+{% block contenido %}
+<div class="cabecera"><div><h1>Editar celda {{ celda.numero }}</h1><p>Solo se pueden modificar celdas desocupadas.</p></div></div>
+<div class="panel panel-form"><form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3"><label for="numero" class="form-label">Número</label><input id="numero" name="numero" maxlength="12" required class="form-control" value="{{ celda.numero }}" {% if celda.estado=='Ocupada' %}disabled{% endif %}></div>
+  <div class="mb-3"><label for="tipo" class="form-label">Tipo</label><select id="tipo" name="tipo" class="form-select" {% if celda.estado=='Ocupada' %}disabled{% endif %}><option {% if celda.tipo=='Carro' %}selected{% endif %}>Carro</option><option {% if celda.tipo=='Moto' %}selected{% endif %}>Moto</option></select></div>
+  {% if celda.estado!='Ocupada' %}<button class="btn btn-primario">Guardar cambios</button>{% else %}<p class="texto-error">La celda está ocupada: primero registra la salida.</p>{% endif %}
+  <a class="btn btn-secundario" href="{{ url_for('celdas.lista') }}">Volver</a>
+</form></div>
+{% endblock %}

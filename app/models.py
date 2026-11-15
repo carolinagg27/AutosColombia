@@ -74,7 +74,9 @@ class Mensualidad(db.Model):
 
     def esta_vigente(self, hoy=None):
         hoy = hoy or date.today()
-        return self.fecha_inicio <= hoy <= self.fecha_fin and self.pago is not None
+        return (self.fecha_inicio <= hoy <= self.fecha_fin
+                and self.pago is not None
+                and self.pago.valor_cop == self.valor_cop)
 
 
 class Pago(db.Model):

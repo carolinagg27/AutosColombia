@@ -1,0 +1,19 @@
+RESULTADOS REALES DE LAS PRUEBAS LOCALES | 2026-11-15
+
+SQLite, restricciones, respaldo, restauracion y estructura de codigo:
+.....................                                                    [100%]
+21 passed in 0.95s
+
+Interfaz de consulta de ingreso en Chromium con API simulada:
+Interfaz: consulta válida, cliente, mensualidad y celdas correctas: OK
+Interfaz: limpiar resultados al cambiar placa: OK
+Interfaz: mensualidad vencida bloquea confirmación: OK
+Interfaz: vehículo inexistente bloquea confirmación: OK
+Interfaz: sin conexión muestra error y bloquea confirmación: OK
+Interfaz: una respuesta tardía no autoriza una placa distinta: OK
+
+Compilacion Python: OK
+Node check: OK
+
+PENDIENTE: pruebas de la aplicacion real con Flask, Windows, Chrome y Edge.
+El resultado NO equivale a certificacion de funcionalidad 100%.

@@ -9,7 +9,13 @@
   <div><label class="form-label">Rol</label><select name="rol" class="form-select"><option>Operario</option><option>Administrador</option></select></div>
   <div class="campo-boton"><button class="btn btn-primario">Crear usuario</button></div>
 </form></div>
-<div class="panel"><h2>Usuarios registrados</h2><div class="table-responsive"><table class="table tabla"><thead><tr><th>NOMBRE</th><th>USUARIO</th><th>ROL</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody>
-{% for u in usuarios %}<tr><td>{{ u.nombre }}</td><td>{{ u.usuario }}</td><td>{{ u.rol }}</td><td>{{ 'Activo' if u.activo else 'Inactivo' }}</td><td>{% if u.id != current_user.id %}<form action="{{ url_for('auth.cambiar_estado', id=u.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-secundario btn-sm">{{ 'Desactivar' if u.activo else 'Activar' }}</button></form>{% else %}Tu cuenta{% endif %}</td></tr>{% endfor %}
+<div class="panel"><h2>Usuarios registrados</h2>
+<form method="get" class="form-cuadricula mb-3" aria-label="Filtros de usuarios">
+  <div><label for="buscar_usuarios" class="form-label">Buscar por nombre o usuario</label><input id="buscar_usuarios" name="buscar" value="{{ buscar }}" class="form-control" maxlength="100" placeholder="Nombre o usuario"></div>
+  <div><label for="rol_usuarios" class="form-label">Rol</label><select id="rol_usuarios" name="rol" class="form-select"><option value="">Todos</option>{% for opcion in ['Administrador','Operario'] %}<option value="{{ opcion }}" {% if rol_filtro == opcion %}selected{% endif %}>{{ opcion }}</option>{% endfor %}</select></div>
+  <div><label for="estado_usuarios" class="form-label">Estado</label><select id="estado_usuarios" name="estado" class="form-select"><option value="">Todos</option><option value="activo" {% if estado_filtro == 'activo' %}selected{% endif %}>Activo</option><option value="inactivo" {% if estado_filtro == 'inactivo' %}selected{% endif %}>Inactivo</option></select></div>
+  <div class="campo-boton"><button type="submit" class="btn btn-primario">Filtrar</button> <a href="{{ url_for('auth.usuarios') }}" class="btn btn-secundario">Restablecer</a></div>
+</form><div class="table-responsive"><table class="table tabla"><thead><tr><th>NOMBRE</th><th>USUARIO</th><th>ROL</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody>
+{% for u in usuarios %}<tr><td>{{ u.nombre }}</td><td>{{ u.usuario }}</td><td>{{ u.rol }}</td><td>{{ 'Activo' if u.activo else 'Inactivo' }}</td><td><a class="btn btn-secundario btn-sm" href="{{ url_for('auth.editar_usuario', id=u.id) }}">Editar</a> {% if u.id != current_user.id %}<form class="d-inline" action="{{ url_for('auth.cambiar_estado', id=u.id) }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-secundario btn-sm">{{ 'Desactivar' if u.activo else 'Activar' }}</button></form>{% else %}Tu cuenta{% endif %}</td></tr>{% else %}<tr><td colspan="5" class="vacio">No hay usuarios que coincidan con los filtros.</td></tr>{% endfor %}
 </tbody></table></div></div>
 {% endblock %}

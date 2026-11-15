@@ -11,12 +11,18 @@
 </form></div>
 {% endif %}
 <div class="panel"><div class="panel-titulo"><h2>Mapa de ocupación</h2><small class="texto-gris">Disponible · Ocupada · Fuera de servicio</small></div>
+<form method="get" class="filtros-celdas">
+  <div><label for="tipo_filtro">Tipo de celda</label><select id="tipo_filtro" name="tipo" class="form-select"><option value="">Todos</option><option value="Carro" {% if tipo_filtro=='Carro' %}selected{% endif %}>Carro</option><option value="Moto" {% if tipo_filtro=='Moto' %}selected{% endif %}>Moto</option></select></div>
+  <div><label for="estado_filtro">Estado</label><select id="estado_filtro" name="estado" class="form-select"><option value="">Todos</option>{% for est in ['Disponible','Ocupada','Fuera de servicio'] %}<option value="{{ est }}" {% if estado_filtro==est %}selected{% endif %}>{{ est }}</option>{% endfor %}</select></div>
+  <button class="btn btn-secundario" type="submit">Filtrar</button><a class="btn btn-secundario" href="{{ url_for('celdas.lista') }}">Restablecer</a>
+</form>
 <div class="cuadricula-celdas">
 {% for celda in celdas %}
 <div class="tarjeta-celda {{ 'libre' if celda.estado == 'Disponible' else 'ocupada' if celda.estado == 'Ocupada' else 'inactiva' }}">
   <div class="celda-icono">{{ '🚗' if celda.tipo == 'Carro' else '🛵' }}</div>
   <strong>{{ celda.numero }}</strong><small>{{ celda.tipo }}</small><span>{{ celda.estado }}</span>
   {% if current_user.rol == 'Administrador' and celda.estado != 'Ocupada' %}
+  <a class="boton-celda" href="{{ url_for('celdas.editar', id=celda.id) }}">Editar</a>
   <form action="{{ url_for('celdas.estado', id=celda.id) }}" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="estado" value="{{ 'Fuera de servicio' if celda.estado == 'Disponible' else 'Disponible' }}">
     <button class="boton-celda" type="submit">{{ 'Deshabilitar' if celda.estado == 'Disponible' else 'Habilitar' }}</button>
